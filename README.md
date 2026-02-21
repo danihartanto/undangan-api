@@ -40,3 +40,32 @@ Kita pakai:
             │   ├── urls.py
             │
             └── manage.py
+        - Buat folder apps:
+            ```
+            mkdir apps
+            cd apps
+            ```
+        - Buat apps utama:
+            ```
+            python ../manage.py startapp accounts
+            python ../manage.py startapp invitations
+            python ../manage.py startapp rsvp
+            
+            jalankan 1 per 1
+            ```
+        - Kembali ke root
+            ```
+            cd..
+            ```
+        - Struktur saat ini
+            invitation_be/
+            │
+            ├── apps/
+            │   ├── accounts/
+            │   ├── invitations/
+            │   ├── rsvp/
+            │
+            ├── config/
+            ├── manage.py
+            └── venv/
+
