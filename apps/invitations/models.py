@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils.text import slugify
 import uuid
 import urllib.parse
+import re
 
 class Invitation(models.Model):
     EVENT_TYPE_CHOICES = (
@@ -94,8 +95,9 @@ class Guest(models.Model):
     
     def get_invitation_link(self):
         base_url = getattr(settings, "FRONTEND_URL", "http://127.0.0.1:5500")
-        hard_url = "http://127.0.0.1:5500"
+        hard_url = "https://paynem.com"
         # return f"{base_url}/invitations/invit_page.html?/{self.invitation.slug}/{self.guest_slug}/"
+        # return f"{hard_url}/invitations/invit_page.html?{self.invitation.slug}/{self.guest_slug}/"
         return f"{hard_url}/invitations/invit_page.html?{self.invitation.slug}/{self.guest_slug}/"
 
 
@@ -103,13 +105,15 @@ class Guest(models.Model):
         if not self.phone:
             return None
 
-        clean_phone = self.phone.replace("-", "").replace(" ", "")
+        # clean_phone = self.phone.replace("-", "").replace(" ", "")
+        clean_phone = self.validate_whatsapp_number(self.phone)
 
         message = (
-            f"Assalamu'alaikum {self.name},\n\n"
-            f"Kami mengundang Anda untuk menghadiri acara:\n"
+            f"Assalamu'alaikum Wr. Wb. \n\n Yth. *{self.name}*,\n\n"
+            f"Kami mengundang Anda untuk menghadiri acara pernikahan kami:\n"
             f"{self.invitation.title}\n\n"
-            f"Silakan buka link berikut:\n"
+            f"Kami berharap akan kehadiran bapak/ibu/sahabat di hari bahagia kami.\n"
+            f"Untuk detail waktu dan lokasi silakan buka link berikut:\n"
             f"{self.get_invitation_link()}"
         )
 
@@ -117,3 +121,21 @@ class Guest(models.Model):
         encoded_message = urllib.parse.quote(message)
 
         return f"https://wa.me/{clean_phone}?text={encoded_message}"
+
+    def validate_whatsapp_number(self, value):
+        if not value:
+            return value
+
+        # Hapus semua kecuali angka dan +
+        value = re.sub(r'[^0-9+]', '', value)
+
+        if value.startswith('08'):
+            value = '+62' + value[1:]
+
+        elif value.startswith('62'):
+            value = '+' + value
+
+        elif not value.startswith('+'):
+            value = '+62' + value
+
+        return value

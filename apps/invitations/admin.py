@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from .models import Invitation, Guest
-
+from django.utils.html import format_html
 
 @admin.register(Invitation)
 class InvitationAdmin(admin.ModelAdmin):
@@ -80,24 +80,51 @@ class GuestAdmin(admin.ModelAdmin):
         "invitation",
         "rsvp_status",
         "phone",
+        "invitation_link",
         "invitation_link_display",
-        "get_whatsapp_link",
+        "whatsapp_link_display",
         "created_at",
     )
 
     readonly_fields = (
         "id",
         "guest_slug",
+        "invitation_link",
         "invitation_link_display",
         "whatsapp_link_display",
         "created_at",
         "updated_at",
     )
 
-    def invitation_link_display(self, obj):
+    def invitation_link(self, obj):
         return obj.get_invitation_link()
-    invitation_link_display.short_description = "Invitation Link"
+    invitation_link.short_description = "Invitation Link"
 
+    # def whatsapp_link_display(self, obj):
+    #     return obj.get_whatsapp_link()
+    # whatsapp_link_display.short_description = "WhatsApp Link"
+    
+    def invitation_link_display(self, obj):
+        hard_url = "paynem.com"
+        link = obj.get_invitation_link()
+        # return f"{base_url}/invitations/invit_page.html?/{self.invitation.slug}/{self.guest_slug}/"
+        # return f"{hard_url}/invitations/invit_page.html?{obj.invitation.slug}/{obj.guest_slug}/"
+        return format_html(
+            '<a class="button" style="background:#0096c7;color:white;padding:4px 8px;border-radius:4px;" href="{}" target="_blank">🌐 Open</a>',
+            link
+        )
+    
+    invitation_link_display.short_description = "Invitation Link Display"
+
+    
+    
     def whatsapp_link_display(self, obj):
-        return obj.get_whatsapp_link()
+        link = obj.get_whatsapp_link()
+        if not link:
+            return "-"
+        return format_html(
+            '<a class="button" style="background:#25D366;color:white;padding:4px 8px;border-radius:4px;" href="{}" target="_blank">📲 Send</a>',
+            link
+        )
     whatsapp_link_display.short_description = "WhatsApp Link"
+    
